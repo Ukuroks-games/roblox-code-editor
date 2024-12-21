@@ -1,3 +1,3 @@
-# Roblox project template
+# Code editor
 
-Just template of project for roblox game for vscode
+Code editor in game.

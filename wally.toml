@@ -1,27 +1,25 @@
 [package]
-name = "owner/packageName"
+name = "egor00f/code-editor"
 
-description = "description of package"
+description = "Code editor in game"
 
 version = "0.1.0"
 
 registry = "https://github.com/UpliftGames/wally-index"
 
-# or server
 realm = "shared"
 
-license = ""
+license = "MIT"
 
-repository = "https://github/"
+repository = "https://github/Ukuroks-Games/roblox-code-editor"
 
-authors = ["You <you mail>"]
+authors = ["Egor00f <velikiydolbayeb@gmail.com>"]
 
-exclude = ["packageName.rbxl"]
+exclude = ["code-editor.rbxl"]
 
 private = false
 
 [dependencies]
-
 
 [server-dependencies]
 
