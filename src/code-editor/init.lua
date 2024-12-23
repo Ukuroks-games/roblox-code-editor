@@ -10,10 +10,20 @@ codeEditor.__index = codeEditor
 	Таблица цветов
 ]]
 export type ColorsTable = {
+	--[[
+		Основной цвет
+	]]
 	Main: Color3,
+
+	--[[
+		Цвет вкладки
+	]]
 	TabArea: Color3
 }
 
+--[[
+	Создать таблицу цветов редактора
+]]
 function codeEditor.newColorsTable(): ColorsTable
 	return {
 		Main = Color3.fromHex("#303030"),
@@ -28,6 +38,9 @@ export type codeEditor = typeof(setmetatable(
 		]]
 		_MainFrame: Frame,
 
+		--[[
+			Фрейм, в которм находятся вклдки
+		]]
 		_TabsContentArea: Frame,
 
 		--[[
@@ -40,6 +53,9 @@ export type codeEditor = typeof(setmetatable(
 		]]
 		_tabs: {tab.Tab},
 
+		--[[
+			Таблица цветов редактора
+		]]
 		_colorsTable: ColorsTable,
 
 		--[[
@@ -50,7 +66,9 @@ export type codeEditor = typeof(setmetatable(
 )
 
 
-
+--[[
+	Создать редактор
+]]
 function codeEditor.new(mainFrame: Frame, ColorsTable: ColorsTable?): codeEditor
 
 	local TabsContentArea = Instance.new("Frame", mainFrame)
@@ -65,7 +83,7 @@ function codeEditor.new(mainFrame: Frame, ColorsTable: ColorsTable?): codeEditor
 			_MainFrame = mainFrame,
 			_activeTab = Instance.new("NumberValue", mainFrame),
 			_tabs = {
-				[1] = tab.new("Tab", nil, TabsContentArea, tab.newColorsTable(nil, colors_Table.TabArea, nil))
+				[1] = tab.new("Tab", nil, TabsContentArea, tab.newColorsTable(nil, colors_Table.TabArea))
 			},
 			_TabsContentArea = TabsContentArea,
 			_colorsTable = colors_Table,

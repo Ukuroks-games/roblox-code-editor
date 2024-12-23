@@ -13,13 +13,18 @@ local algorithm = stdlib.algorithm
 
 local tab = {}
 
-
+--[[
+	Таблица цветов вкладки
+]]
 export type ColorsTable = {
 	Text: Color3,
 	Background: Color3,
 	Nums: Color3
 }
 
+--[[
+	Создать таблицу цветов вкладки
+]]
 function tab.newColorsTable(text: Color3?, background: Color3?, nums: Color3?): ColorsTable
 	return   {
 		Text = text or Color3.fromHex("#d6d6d6"),
@@ -40,13 +45,18 @@ export type Tab = typeof(setmetatable(
 		--[[
 		
 		]]
-		_MainFrame: TextBox,
+		_MainFrame: ScrollingFrame,
+
+		_TextBox: TextBox,
 
 		--[[
 			Нумерация строк
 		]]
 		_NumsColumn: TextLabel,
-
+		
+		--[[
+			Таблица цветов вкладки
+		]]
 		_colorTable: ColorsTable
 	}, tabClass
 ))
@@ -56,9 +66,12 @@ export type Tab = typeof(setmetatable(
 ]]
 function tab.new(name: string?, code: string?, parent: Frame?, colorsTable: ColorsTable?): Tab
 
+	local MainFrome = Instance.new("ScrollingFrame", parent)
+
 	local self = setmetatable(
 		{
-			_MainFrame = Instance.new("TextBox", parent),
+			_MainFrame = MainFrome,
+			_TextBox = Instance.new("TextBox", MainFrome),
 			_NumsColumn = Instance.new("TextLabel", parent),
 			_colorsTable = colorsTable or tab.newColorsTable()
 		}, 
@@ -67,7 +80,7 @@ function tab.new(name: string?, code: string?, parent: Frame?, colorsTable: Colo
 
 	self._MainFrame.InputBegan:Connect(function(inputObject: InputObject) 
 
-		if inputObject.KeyCode == Enum.KeyCode.Backspace or inputObject.KeyCode == Enum.KeyCode.Return then
+		if inputObject.KeyCode.Value == Enum.KeyCode.Backspace.Value or inputObject.KeyCode.Value == Enum.KeyCode.Return.Value then
 			local str = ""
 
 			for i = 1, algorithm.count(code, '\n'), 1 do
@@ -78,40 +91,53 @@ function tab.new(name: string?, code: string?, parent: Frame?, colorsTable: Colo
 		end
 	end)
 
-	self._MainFrame.Size = UDim2.fromScale(0.9, 1)
-	self._MainFrame.Position = UDim2.fromScale(0.1, 0)
-	self._MainFrame.ClearTextOnFocus = false
-	self._MainFrame.TextXAlignment = Enum.TextXAlignment.Left
-	self._MainFrame.TextYAlignment = Enum.TextYAlignment.Top
-	self._MainFrame.MultiLine = true
-	self._MainFrame.Text = code
-	self._MainFrame.TextColor3 = self._colorsTable.Text
-	self._MainFrame.BackgroundColor3 = self._colorsTable.Background
+	self:SetColors(self._colorsTable)
+
+	self._MainFrame.Size = UDim2.new(1, -self._NumsColumn.TextSize, 1, 0)
+	self._MainFrame.Position = UDim2.new(0, self._NumsColumn.TextSize, 0, 0)
+
+	self._TextBox.Size = UDim2.fromScale(1, 1)
+	self._TextBox.ClearTextOnFocus = false
+	self._TextBox.TextXAlignment = Enum.TextXAlignment.Left
+	self._TextBox.TextYAlignment = Enum.TextYAlignment.Top
+	self._TextBox.MultiLine = true
+	self._TextBox.Text = code
+	self._TextBox.BackgroundTransparency = 1
 
 	Instance.new("UIPadding", self._MainFrame)
 
-	self._NumsColumn.Size = UDim2.fromScale(0.1, 1)
+	self._NumsColumn.Size = UDim2.new(0, self._NumsColumn.TextSize, 1, 0)
 	self._NumsColumn.TextXAlignment = Enum.TextXAlignment.Right
 	self._NumsColumn.TextYAlignment = Enum.TextYAlignment.Top
 	self._NumsColumn.TextColor3 = self._colorsTable.Nums
-	self._NumsColumn.BackgroundColor3 = self._colorsTable.Background
-
-	
-
 
 	return self
 end
 
 function tabClass.GetText(self: Tab): string
-	return self._MainFrame.Text
+	return self._TextBox.Text
 end
 
+--[[
+	Изменить размер текста
+]]
 function tabClass.SetFontSize(self: Tab, newFontSize)
-	self._MainFrame.TextSize = newFontSize
+	self._TextBox.TextSize = newFontSize
 	self._NumsColumn.TextSize = newFontSize
+
+	self._NumsColumn.Size = UDim2.new(0, newFontSize, 1, 0)
+	self._MainFrame.Size = UDim2.new(1, -newFontSize, 1, 0)
+	self._MainFrame.Position = UDim2.new(0, newFontSize, 0, 0)
 end
 
-
+--[[
+	Изменить цвета вкладки
+]]
+function tabClass.SetColors(self: Tab, colorsTable: ColorsTable)
+	self._MainFrame.BackgroundColor3 = colorsTable.Background
+	self._NumsColumn.BackgroundColor3 = colorsTable.Background
+	self._TextBox.TextColor3 = colorsTable.Text
+end
 
 --[[
 	Удалить вкладку
