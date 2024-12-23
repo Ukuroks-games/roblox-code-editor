@@ -1,7 +1,25 @@
+
+
+
 local tab = require(script.tab)
 
 local codeEditor = {}
 codeEditor.__index = codeEditor
+
+--[[
+	Таблица цветов
+]]
+export type ColorsTable = {
+	Main: Color3,
+	TabArea: Color3
+}
+
+function codeEditor.newColorsTable(): ColorsTable
+	return {
+		Main = Color3.fromHex("#303030"),
+		TabArea = Color3.fromHex("#4d4d4d")
+	}
+end
 
 export type codeEditor = typeof(setmetatable(
 	{} :: {
@@ -20,7 +38,9 @@ export type codeEditor = typeof(setmetatable(
 		--[[
 			Список всех вкладок
 		]]
-		_tabs: {tab.tab},
+		_tabs: {tab.Tab},
+
+		_colorsTable: ColorsTable,
 
 		--[[
 			Список RBXScriptConnection
@@ -29,38 +49,37 @@ export type codeEditor = typeof(setmetatable(
 	}, codeEditor)
 )
 
---[[
-	Таблица цветов
-]]
-export type colorsTable = {
-	Main: Color3,
-	Tab: Color3
-}
 
-function codeEditor.new(mainFrame: Frame?): codeEditor
 
-	local MainFrame = mainFrame or Instance.new("Frame")
-	local TabsContentArea = Instance.new("Frame", MainFrame)
+function codeEditor.new(mainFrame: Frame, ColorsTable: ColorsTable?): codeEditor
+
+	local TabsContentArea = Instance.new("Frame", mainFrame)
+	
+	TabsContentArea.Size = UDim2.fromScale(1, 0.8)
+	TabsContentArea.Position = UDim2.fromScale(0, 0.2)
+
+	local colors_Table: ColorsTable = codeEditor.newColorsTable()
 
 	local self = setmetatable(
 		{
-			_MainFrame = MainFrame,
-			_activeTab = Instance.new("NumberValue", MainFrame),
+			_MainFrame = mainFrame,
+			_activeTab = Instance.new("NumberValue", mainFrame),
 			_tabs = {
-				[1] = tab.new(nil, nil, TabsContentArea)
+				[1] = tab.new("Tab", nil, TabsContentArea, tab.newColorsTable(nil, colors_Table.TabArea, nil))
 			},
 			_TabsContentArea = TabsContentArea,
+			_colorsTable = colors_Table,
 			_connections = {}
 		}, 
 		codeEditor
 	)
 
-	self._TabsContentArea.Size = UDim2.fromScale(1, 0.8)
-	self._TabsContentArea.Position = UDim2.fromScale(0, 0.2)
 
 	self._activeTab.Value = 1
+	self._activeTab.Name = "activeTab"
 
 	table.insert(self._connections, self._activeTab.Changed:Connect(function(newValue: number) 
+		
 		for _, v in pairs(self._tabs) do
 			v._MainFrame.Visible = false
 		end
@@ -81,7 +100,7 @@ end
 --[[
 	Открыть новую вклюду с кодом
 ]]
-function codeEditor.OpenCode(self: codeEditor, code: string): tab.tab
+function codeEditor.OpenCode(self: codeEditor, code: string): tab.Tab
 	local tab = tab.new(nil, code, self._TabsContentArea)
 
 	table.insert(self._tabs, tab)
@@ -89,6 +108,9 @@ function codeEditor.OpenCode(self: codeEditor, code: string): tab.tab
 	return tab
 end
 
+--[[
+	Удалить редактор
+]]
 function codeEditor.Destroy(self: codeEditor)
 	for _, v in pairs(self._tabs) do
 		v:Destroy()
